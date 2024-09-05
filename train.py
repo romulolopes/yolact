@@ -260,7 +260,6 @@ def train():
 
     print('Begin training!')
     print()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # try-except so you can use ctrl+c to save early and stop training
     try:
         for epoch in range(num_epochs):
@@ -269,7 +268,6 @@ def train():
                 continue
             
             for datum in data_loader:
-                datum = datum.to(device)
                 # Stop if we've reached an epoch if we're resuming from start_iter
                 if iteration == (epoch+1)*epoch_size:
                     break
@@ -453,7 +451,6 @@ def no_inf_mean(x:torch.Tensor):
 
 def compute_validation_loss(net, data_loader, criterion):
     global loss_types
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     with torch.no_grad():
         losses = {}
@@ -461,7 +458,6 @@ def compute_validation_loss(net, data_loader, criterion):
         # Don't switch to eval mode because we want to get losses
         iterations = 0
         for datum in data_loader:
-            data_loader = data_loader.to(device)
             images, targets, masks, num_crowds = prepare_data(datum)
             out = net(images)
 
