@@ -256,7 +256,7 @@ def enforce_size(img, targets, masks, num_crowds, new_w, new_h):
         
 
 
-'''
+
 def detection_collate(batch):
     """Custom collate fn for dealing with batches of images that have a different
     number of associated object annotations (bounding boxes).
@@ -282,40 +282,4 @@ def detection_collate(batch):
         num_crowds.append(sample[1][2])
 
     return imgs, (targets, masks, num_crowds)
-'''
-def detection_collate(batch):
-    """Custom collate function for dealing with batches of images that have a different
-    number of associated object annotations (bounding boxes).
 
-    Arguments:
-        batch: (tuple) A tuple of tensor images and (lists of annotations, masks)
-
-    Returns:
-        A tuple containing:
-            1) (tensor) batch of images stacked on their 0 dim
-            2) (list<tensor>, list<tensor>, list<int>) annotations for a given image are stacked
-                on 0 dim. The output gt is a tuple of annotations and masks.
-    """
-    # Set the device to CUDA if available
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Create a CUDA generator
-    generator = torch.Generator(device=device)
-
-    targets = []
-    imgs = []
-    masks = []
-    num_crowds = []
-
-    for sample in batch:
-        # Move images and tensors to the GPU
-        imgs.append(sample[0].to(device))
-        targets.append(torch.FloatTensor(sample[1][0]).to(device))
-        masks.append(torch.FloatTensor(sample[1][1]).to(device))
-        num_crowds.append(sample[1][2])  # Assuming num_crowds is an int, no need to move to device
-
-    # Example usage of the generator with a PyTorch function
-    # Example: torch.randperm using the CUDA generator
-    indices = torch.randperm(len(imgs), generator=generator, device=device)  # Ensure the use of generator
-
-    return imgs, (targets, masks, num_crowds)
