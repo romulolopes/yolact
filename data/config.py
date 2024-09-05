@@ -55,6 +55,15 @@ COCO_LABEL_MAP = { 1:  1,  2:  2,  3:  3,  4:  4,  5:  5,  6:  6,  7:  7,  8:  8
                   82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80}
 
 
+AUTOKARY_CLASSES = ('1','2','3', '4', '5', '6', '7', '8', '9', '10', '11',
+                    '12', '13', '14', '15', '16', '17', '18', '19',
+                    '20', '21', '22', '23','24')
+
+AUTOKARY_LABEL_MAP = { 1:  1,  2:  2,  3:  3,  4:  4,  5:  5,  6:  6,  7:  7,  8:  8,
+                   9:  9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16,
+                  18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24}
+
+
 
 # ----------------------- CONFIG CLASS ----------------------- #
 
@@ -144,6 +153,16 @@ coco2017_dataset = dataset_base.copy({
     'valid_info': './data/coco/annotations/instances_val2017.json',
 
     'label_map': COCO_LABEL_MAP
+})
+
+autokary2022_dataset = dataset_base.copy({
+    'name': 'AutoKary 2022',
+    
+    'train_info': './dataset/train/_annotations.coco.json',
+    'valid_info': './dataset/val/_annotations.coco.json',
+
+    'label_map': AUTOKARY_LABEL_MAP,
+    'class_names': AUTOKARY_CLASSES
 })
 
 coco2017_testdev_dataset = dataset_base.copy({
@@ -702,6 +721,57 @@ yolact_base_config = coco_base_config.copy({
 
     'use_semantic_segmentation_loss': True,
 })
+
+yolact_autokary_config = coco_base_config.copy({
+    'name': 'yolact_base',
+
+    # Dataset stuff
+    'dataset': autokary2022_dataset,
+    'num_classes': len(autokary2022_dataset.class_names) + 1,
+
+    # Image Size
+    'max_size': 550,
+    
+    # Training params
+    'lr_steps': (280000, 600000, 700000, 750000),
+    'max_iter': 800000,
+    
+    # Backbone Settings
+    'backbone': resnet101_backbone.copy({
+        'selected_layers': list(range(1, 4)),
+        'use_pixel_scales': True,
+        'preapply_sqrt': False,
+        'use_square_anchors': True, # This is for backward compatability with a bug
+
+        'pred_aspect_ratios': [ [[1, 1/2, 2]] ]*5,
+        'pred_scales': [[24], [48], [96], [192], [384]],
+    }),
+
+    # FPN Settings
+    'fpn': fpn_base.copy({
+        'use_conv_downsample': True,
+        'num_downsample': 2,
+    }),
+
+    # Mask Settings
+    'mask_type': mask_type.lincomb,
+    'mask_alpha': 6.125,
+    'mask_proto_src': 0,
+    'mask_proto_net': [(256, 3, {'padding': 1})] * 3 + [(None, -2, {}), (256, 3, {'padding': 1})] + [(32, 1, {})],
+    'mask_proto_normalize_emulate_roi_pooling': True,
+
+    # Other stuff
+    'share_prediction_module': True,
+    'extra_head_net': [(256, 3, {'padding': 1})],
+
+    'positive_iou_threshold': 0.5,
+    'negative_iou_threshold': 0.4,
+
+    'crowd_iou_threshold': 0.7,
+
+    'use_semantic_segmentation_loss': True,
+})
+
 
 yolact_im400_config = yolact_base_config.copy({
     'name': 'yolact_im400',
