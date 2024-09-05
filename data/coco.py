@@ -299,6 +299,9 @@ def detection_collate(batch):
     # Set the device to CUDA if available
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    # Create a CUDA generator
+    generator = torch.Generator(device=device)
+
     targets = []
     imgs = []
     masks = []
@@ -310,5 +313,9 @@ def detection_collate(batch):
         targets.append(torch.FloatTensor(sample[1][0]).to(device))
         masks.append(torch.FloatTensor(sample[1][1]).to(device))
         num_crowds.append(sample[1][2])  # Assuming num_crowds is an int, no need to move to device
+
+    # Example usage of the generator with a PyTorch function
+    # Example: torch.randperm using the CUDA generator
+    indices = torch.randperm(len(imgs), generator=generator, device=device)  # Ensure the use of generator
 
     return imgs, (targets, masks, num_crowds)
