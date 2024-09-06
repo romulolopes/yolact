@@ -157,7 +157,9 @@ coco2017_dataset = dataset_base.copy({
 
 autokary2022_dataset = dataset_base.copy({
     'name': 'AutoKary 2022',
-    
+
+    'train_images': './dataset/train/',
+    'valid_images': './dataset/val/',
     'train_info': './dataset/train/_annotations.coco.json',
     'valid_info': './dataset/val/_annotations.coco.json',
 
